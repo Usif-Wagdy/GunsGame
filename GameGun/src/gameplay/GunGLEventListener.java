@@ -136,6 +136,237 @@ public class GunGLEventListener extends GunListener {
 
     }
 
+    public void display(GLAutoDrawable gld) {
+        if (isPaused) {
+            return;
+        }
+
+        GL gl = gld.getGL();
+        gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+        gl.glLoadIdentity();
+        DrawBackground(gl);
+        displayScore(gl);
+        DrawSprite(gl, 53, 90, 40 - N, 0.35f, gameplay.GunGLEventListener.Directions.up);
+        handleKeyPress();
+        gl.glColor3f(1.0f, 1.0f, 1.0f);
+
+        soldierIndex = soldierIndex % 4;
+        if (GameisRunning) {
+            displayTimer(gl);
+            DrawSprite(gl, soldierX, soldierY, soldierIndex, 1, direction);
+            for (Bullet bullet : bullets) {
+                if (bullet.isFired) {
+                    switch (bullet.directions) {
+                        case up:
+                            bullet.y += 1.5;
+                            break;
+                        case down:
+                            bullet.y -= 1.5;
+                            break;
+                        case right:
+                            bullet.x += 1.5;
+                            break;
+                        case left:
+                            bullet.x -= 1.5;
+                            break;
+                        case up_left:
+                            bullet.y += 1.5;
+                            bullet.x -= 1.5;
+                            break;
+                        case up_right:
+                            bullet.y += 1.5;
+                            bullet.x += 1.5;
+                            break;
+                        case down_left:
+                            bullet.y -= 1.5;
+                            bullet.x -= 1.5;
+                            break;
+                        case down_right:
+                            bullet.y -= 1.5;
+                            bullet.x += 1.5;
+                            break;
+                    }
+                    DrawSprite(gl, bullet.x, bullet.y, 4, 0.3f, bullet.directions);
+
+                }
+            }
+            for (Zombie zombie : zombies1) {
+                zombie.move1(speed);
+                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1.2f, gameplay.GunGLEventListener.Directions.up);
+                // stage 1
+                if (checkCollisionWithSoldier(zombie)) {
+                    playSound("src\\Assets\\sounds\\zombieBite.wav");
+                }
+                if (counter == 10 && !nextLevelSoundPlayed) {
+                    speed = 0.5;
+                    playSound("src\\Assets\\sounds\\level2.wav");
+                    nextLevelSoundPlayed = true; // Mark the sound as played
+                }
+
+                // stage 2
+                if (counter == 20 && nextLevelSoundPlayed) {
+                    speed = 1;
+                    playSound(  "src\\Assets\\sounds\\level2.wav");
+                    nextLevelSoundPlayed = false; // Mark the sound as played
+                }
+
+            }
+            for (Zombie zombie : zombies2) {
+                zombie.move2(speed);
+                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1f, gameplay.GunGLEventListener.Directions.up);
+                // stage 1
+                if (checkCollisionWithSoldier(zombie)) {
+                    playSound( "src\\Assets\\sounds\\zombieBite.wav");
+                }
+                if (counter == 10) {
+                    speed = 0.5;
+                }
+                // stage 2
+                if (counter == 20) {
+                    speed = 1;
+                }
+            }
+            for (Zombie zombie : zombies3) {
+                zombie.move3(speed);
+                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1.2f, gameplay.GunGLEventListener.Directions.up);
+                if (checkCollisionWithSoldier(zombie)) {
+                    playSound("src\\Assets\\sounds\\zombieBite.wav");
+                }
+                // stage 1
+                if (counter == 10) {
+                    speed = 0.5;
+                }
+                // stage 2
+                if (counter == 20) {
+                    speed = 1;
+                }
+            }
+            handleCollisions(gl);
+            for (int i = 0; i < bloodEffects.size(); i++) {
+                BloodEffect blood = bloodEffects.get(i);
+                // رسم الدم
+                DrawSprite(gl, blood.x, blood.y, texture.length - 2, 1, gameplay.GunGLEventListener.Directions.up); // Blood texture
+                blood.timer--;
+                if (blood.timer <= 0) {
+                    bloodEffects.remove(i);
+                    i--;
+                }
+            }
+            if (N==5) {
+                GameisRunning = false;
+                lose=true;
+                mainMenu.addPlayerScore(playerName, score);
+            }
+            if (score ==30){
+                GameisRunning = false;
+                lose=false;
+                mainMenu.addPlayerScore(playerName, score);
+            }
+        }
+        if (!GameisRunning&&lose ) {
+            DrawSprite(gl, 45, 50, texture.length - 3, 5f, gameplay.GunGLEventListener.Directions.up);
+            stopGameSound();
+        }
+
+        if(!GameisRunning && !lose){
+            DrawSprite(gl, 45, 50, texture.length - 4, 5f, gameplay.GunGLEventListener.Directions.up);
+            stopGameSound();
+        }
+        long currentTime = System.nanoTime();
+        if (currentTime - lastTime >= 1000_000_000) {
+            timer++;
+            lastTime = currentTime;
+            if (timer > 99) {
+                timer = 0;
+            }
+        }
+
+    }
+
+
+
+
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+    }
+
+    public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
+    }
+
+    public void DrawSprite(GL gl, double x, double y, int index, float scale, Directions dir) {
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[index]);    // Turn Blending On
+
+        int angle = 0;
+        switch (dir) {
+            case up:
+                angle = 0;
+                break;
+            case down:
+                angle = 180;
+                break;
+            case right:
+                angle = -90;
+                break;
+            case left:
+                angle = 90;
+                break;
+            case up_left:
+                angle = 45;
+                break;
+            case up_right:
+                angle = -45;
+                break;
+            case down_left:
+                angle = 135;
+                break;
+            case down_right:
+                angle = -135;
+                break;
+            default:
+                angle = 0;
+        }
+        gl.glPushMatrix();
+        gl.glTranslated(x / (maxWidth / 2.0) - 0.9, y / (maxHeight / 2.0) - 0.9, 0);
+        gl.glScaled(0.1 * scale, 0.1 * scale, 1);
+        gl.glRotated(angle, 0, 0, 1);
+        //System.out.println(x +" " + y);
+        gl.glBegin(GL.GL_QUADS);
+        // Front Face
+        gl.glTexCoord2f(0.0f, 0.0f);
+        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f);
+        gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f);
+        gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f);
+        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glEnd();
+        gl.glPopMatrix();
+
+        gl.glDisable(GL.GL_BLEND);
+    }
+
+
+    public void DrawBackground(GL gl) {
+        gl.glEnable(GL.GL_BLEND);
+        gl.glBindTexture(GL.GL_TEXTURE_2D, textures[textures.length - 1]);    // Turn Blending On
+
+        gl.glPushMatrix();
+        gl.glBegin(GL.GL_QUADS);
+        // Front Face
+        gl.glTexCoord2f(0.0f, 0.0f);
+        gl.glVertex3f(-1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 0.0f);
+        gl.glVertex3f(1.0f, -1.0f, -1.0f);
+        gl.glTexCoord2f(1.0f, 1.0f);
+        gl.glVertex3f(1.0f, 1.0f, -1.0f);
+        gl.glTexCoord2f(0.0f, 1.0f);
+        gl.glVertex3f(-1.0f, 1.0f, -1.0f);
+        gl.glEnd();
+        gl.glPopMatrix();
+
+        gl.glDisable(GL.GL_BLEND);
+    }
 
 
 
@@ -434,6 +665,17 @@ public class GunGLEventListener extends GunListener {
             int digitIndex = digit - '0' + 35;
             DrawSprite(gl, x, y, digitIndex, 0.4f, gameplay.GunGLEventListener.Directions.up);
             x += 5;
+        }
+    }
+    public void displayTimer(GL gl) {
+        String timeToString = String.valueOf(timer);
+        double x = 85;
+        double y = 90;
+        for (int i = 0; i < timeToString.length(); i++) {
+            char digit = timeToString.charAt(i);
+            int digitIndex = digit - '0' + 35;
+            DrawSprite(gl, x, y, digitIndex, 0.4f, Directions.up);
+            x += 5; //Distance between numbers
         }
     }
 }
