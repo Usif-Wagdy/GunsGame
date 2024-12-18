@@ -494,8 +494,239 @@ private void showHighScores() {
     });
     gbc.gridy = 1;  // وضع الزر أسفل الزر "Back"
     buttonPanel.add(clearButton, gbc);
-
 }
+
+private void clearHighScores() {
+    highScores.clear();  // مسح الأسماء المخزنة في highScores
+    saveHighScores();    // حفظ الملف بعد مسح الأسماء
+}
+
+
+// دالة لإضافة نتيجة لاعب
+public void addPlayerScore(String playerName, int score) {
+    Player player = new Player(playerName, score);
+    highScores.add(player);  // إضافة اللاعب إلى قائمة highScores
+    saveHighScores();  // حفظ البيانات في الملف بعد إضافة النتيجة
+}
+
+public void saveHighScores() {
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter("highscores.txt"))) {
+        for (Player player : highScores) {
+            writer.write(player.getName() + "," + player.getScore());
+            writer.newLine();
+        }
+        System.out.println("High scores saved successfully!");  // رسالة تأكيد الكتابة
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+public void loadHighScores() {
+    highScores.clear();  // مسح القائمة الحالية من الـ highScores
+    try (BufferedReader reader = new BufferedReader(new FileReader("highscores.txt"))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split(",");
+            if (parts.length == 2) {
+                String name = parts[0];
+                int score = Integer.parseInt(parts[1]);
+                highScores.add(new Player(name, score));  // إضافة اللاعب إلى القائمة
+            }
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+
+
+private void showGameModeOptions() {
+    buttonPanel.removeAll(); // إزالة الأزرار السابقة
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+
+    // زر Single Player
+    singlePlayerButton = createImageButton(
+            IMAGE_PATH + "Single 1.png",
+            IMAGE_PATH + "Sinlge 2.png",
+            () -> showNameInputPage(false)); // تمرير false لأن الوضع Single Player
+    singlePlayerButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 0;
+    buttonPanel.add(singlePlayerButton, gbc);
+
+    // زر Multiplayer
+    multiplayerButton = createImageButton(
+            IMAGE_PATH + "Multi 1.png",
+            IMAGE_PATH + "Multi 2.png",
+            () -> showNameInputPage(true)); // تمرير true لأن الوضع Multiplayer
+    multiplayerButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 1;  // الصف الثاني
+    buttonPanel.add(multiplayerButton, gbc);
+
+    // زر Back للعودة إلى القائمة الرئيسية
+    JButton backButton = createImageButton(
+            IMAGE_PATH + "Return 1.png",
+            IMAGE_PATH + "Return 2.png",
+            this::showMainMenu);
+    backButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 2; // وضع الزر في الصف الثالث
+    buttonPanel.add(backButton, gbc);
+
+    // إعادة الرسم بعد التغيير
+    buttonPanel.revalidate();
+    buttonPanel.repaint();
+}
+
+public void showMainMenu() {
+    buttonPanel.removeAll(); // إزالة جميع الأزرار
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(0, 10, 0, 10);
+    gbc.gridx = 0;
+
+    // زر New Game
+    newGameButton = createImageButton(
+            IMAGE_PATH + "Start 1.png",
+            IMAGE_PATH + "Start 2.png",
+            this::showGameModeOptions);
+    newGameButton.addActionListener(e -> {
+        showGameModeOptions();
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 0;
+    buttonPanel.add(newGameButton, gbc);
+
+    // زر Resume Game
+    resumeGameButton = createImageButton(
+            IMAGE_PATH + "Resume 1.png",
+            IMAGE_PATH + "Resume 2.png",
+            () -> System.out.println("Resume Game Pressed"));
+    resumeGameButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 1;
+    buttonPanel.add(resumeGameButton, gbc);
+
+    // زر High Scores
+    highScoresButton = createImageButton(
+            IMAGE_PATH + "High 1.png",
+            IMAGE_PATH + "High 2.png",
+            () -> showHighScores());
+    highScoresButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 2;
+    buttonPanel.add(highScoresButton, gbc);
+    // زر Exit
+    exitButton = createImageButton(
+            IMAGE_PATH + "Exit 1.png",
+            IMAGE_PATH + "exit 2.png",
+            () -> System.exit(0));
+    exitButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 3;
+    buttonPanel.add(exitButton, gbc);
+
+    // إعادة الرسم بعد التغيير
+    buttonPanel.revalidate();
+    buttonPanel.repaint();
+}
+private void showDifficultyOptions(boolean isMultiPlayer) {
+    buttonPanel.removeAll(); // إزالة الأزرار السابقة
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+
+    // إضافة الأزرار فقط بدون تفاصيل حول الأسماء
+    // زر Easy
+    easyButton = createImageButton(
+            IMAGE_PATH + "EASY 1 (1).png",
+            IMAGE_PATH + "EASY (1).png",
+            () -> startGame(player1Name , "Easy"));
+    easyButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+        startGame(player1Name, "Easy");
+    });
+    gbc.gridy = 0;
+    buttonPanel.add(easyButton, gbc);
+
+    // زر Medium
+    gbc.gridy++;
+    mediumButton = createImageButton(
+            IMAGE_PATH + "Medium 2  .png",
+            IMAGE_PATH + "Medium .png",
+            () -> startGame(player1Name, "Medium"));
+    mediumButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    buttonPanel.add(mediumButton, gbc);
+
+    // زر Hard
+    gbc.gridy++;
+    hardButton = createImageButton(
+            IMAGE_PATH + "HARD 2 .png",
+            IMAGE_PATH + "HARD.png",
+            () -> startGame(player1Name, "Hard"));
+    hardButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    buttonPanel.add(hardButton, gbc);
+
+    // زر Back
+    gbc.gridy++;
+    JButton backButton = createImageButton(
+            IMAGE_PATH + "Return 1.png",
+            IMAGE_PATH + "Return 2.png",
+            this::showGameModeOptions);
+    backButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    buttonPanel.add(backButton, gbc);
+
+    // إعادة الرسم بعد التغيير
+    buttonPanel.revalidate();
+    buttonPanel.repaint();
+}
+
+private void startGame(String playerName, String difficulty) {
+    getContentPane().removeAll();  // إزالة كل العناصر الحالية
+    getContentPane().setLayout(new BorderLayout());  // ضبط التخطيط
+
+    // التأكد من تهيئة gunGLEventListener قبل استخدامه
+    if (gunGLEventListener == null) {
+        gunGLEventListener = new GunGLEventListener(this, playerName, difficulty);  // تمرير المستوى واسم اللاعب
+    }
+
+    GLCanvas glcanvas = new GLCanvas();
+    glcanvas.addGLEventListener(gunGLEventListener);
+    glcanvas.addKeyListener(gunGLEventListener);  // الاستماع إلى ضغطة المفاتيح
+    getContentPane().add(glcanvas, BorderLayout.CENTER);  // إضافة الـ GLCanvas إلى النافذة
+
+    FPSAnimator animator = new FPSAnimator(glcanvas, 15);  // إعداد معدل الإطارات
+    animator.start();  // بدء الأنيماتور
+
+    setTitle("Game Started");
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setSize(700, 700);
+    setLocationRelativeTo(null);
+    setVisible(true);  // إظهار النافذة
+    setFocusable(true);
+    glcanvas.requestFocus();  // طلب التركيز على الـ Canvas
+
+    if (clip != null) clip.stop();  // إيقاف الصوت إذا كان قيد التشغيل
+
+    revalidate();  // إعادة رسم واجهة المستخدم
+    repaint();
+}
+
 
     public static void main(String[] args) {
         MainMenu mainMenu = new MainMenu();
