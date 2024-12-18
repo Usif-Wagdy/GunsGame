@@ -286,6 +286,216 @@ public class MainMenu extends JFrame {
             e.printStackTrace();
         }
     }
+    public void playClickSound(String soundFileName) {
+        try {
+            File soundFile = new File(soundFileName);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
+            Clip clickClip = AudioSystem.getClip();
+            clickClip.open(audioStream);
+            clickClip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+    public void toggleSound() {
+        if (isSoundPlaying) {
+            stopSound();
+            isSoundPlaying = false;
+            // تغيير صورة الزر عند التوقف (الموسيقى متوقفة)
+            ImageIcon icon = new ImageIcon(IMAGE_PATH + "b_Sound2_Inactive.png");
+            Image image = icon.getImage();
+            Image scaledImage = image.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            stopSoundButton.setIcon(new ImageIcon(scaledImage));
+        } else {
+            playSound("src\\Assets\\sounds\\Counter Strike Theme Song (1.6 Main Menu) by Counter- Strike-Valve Games_[cut_109sec].wav");
+            isSoundPlaying = true;
+            // تغيير صورة الزر عند التشغيل (الموسيقى شغالة)
+            ImageIcon icon = new ImageIcon(IMAGE_PATH + "b_Sound2.png");
+            Image image = icon.getImage();
+            Image scaledImage = image.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            stopSoundButton.setIcon(new ImageIcon(scaledImage));
+        }
+    }
+
+        if (clip != null && clip.isRunning()) {
+        clip.stop();
+        clip.setFramePosition(0); // إعادة الموضع إلى بداية الملف
+    }
+}
+private void showNameInputPage(boolean isMultiPlayer) {
+    buttonPanel.removeAll(); // إزالة كل الأزرار السابقة
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+    gbc.insets = new Insets(10, 10, 10, 10);
+
+    // تحديد حجم الـ JTextField
+    JTextField player1NameField = new JTextField(20);
+    JTextField player2NameField = new JTextField(20);
+
+    // تحديد أبعاد الـ JTextField
+    player1NameField.setPreferredSize(new Dimension(200, 30));  // تحديد الطول والعرض للـ JTextField الأول
+    player2NameField.setPreferredSize(new Dimension(200, 30));  // تحديد الطول والعرض للـ JTextField الثاني
+
+    // اسم اللاعب الأول
+    JLabel player1Label = new JLabel("Enter Player 1 Name:");
+    player1Label.setFont(new Font("Georgia", Font.BOLD, 18));
+    player1Label.setForeground(Color.black);
+    gbc.gridy = 0;
+    buttonPanel.add(player1Label, gbc);
+
+    gbc.gridy = 1;
+    buttonPanel.add(player1NameField, gbc);
+
+    if (isMultiPlayer) {
+        // اسم اللاعب الثاني إذا كان Multiplayer
+        JLabel player2Label = new JLabel("Enter Player 2 Name:");
+        player2Label.setFont(new Font("Georgia", Font.BOLD, 18));
+        player2Label.setForeground(Color.black);
+        gbc.gridy = 2;
+        buttonPanel.add(player2Label, gbc);
+
+        gbc.gridy = 3;
+        buttonPanel.add(player2NameField, gbc);
+    }
+
+    // زر Submit كصورة
+    JButton submitButton = createImageButton(
+            "src\\Assets\\Images\\SUBMIT2.png",  // الصورة عند الحالة العادية
+            "src\\Assets\\Images\\SUBMIT.png",   // الصورة عند تمرير الماوس
+            () -> {
+                playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+
+                player1Name = player1NameField.getText().trim();
+                player2Name = isMultiPlayer ? player2NameField.getText().trim() : null;
+
+                // التأكد من أنه تم إدخال جميع الأسماء
+                if (player1Name.isEmpty() || (isMultiPlayer && player2Name.isEmpty())) {
+                    JOptionPane.showMessageDialog(this, "Please enter all names!", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    // إضافة الأسماء إلى playerNames
+                    System.out.println("Player 1: " + player1Name);
+                    if (isMultiPlayer) {
+                        System.out.println("Player 2: " + player2Name);
+                    }
+
+                    playerNames.add(player1Name);
+                    if (isMultiPlayer) playerNames.add(player2Name);
+
+                    // حفظ الأسماء بعد التعديل
+                    saveHighScores();
+
+                    // الانتقال لصفحة اختيار الصعوبة
+                    showDifficultyOptions(isMultiPlayer);
+                }
+
+            });
+    // إضافة الزر إلى الـ panel الموجود في MainMenu
+    gbc.gridy = isMultiPlayer ? 4 : 2; // تحديد الموقع بناءً على الـ isMultiPlayer
+    buttonPanel.add(submitButton, gbc);
+
+    // زر Back
+    JButton backButton = createImageButton(
+            IMAGE_PATH + "Return 1.png",
+            IMAGE_PATH + "Return 2.png",
+            this::showGameModeOptions);
+    backButton.addActionListener(e -> playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav"));
+    gbc.gridy++;
+    buttonPanel.add(backButton, gbc);
+
+    // زر Clear
+    JButton clearButton = createImageButton(
+            IMAGE_PATH + "Clear 1.png",  // الصورة عند الحالة العادية
+            IMAGE_PATH + "Clear 2.png",  // الصورة عند تمرير الماوس
+            () -> {
+                clearHighScores();
+                showHighScores();  // تحديث العرض بعد الحذف
+            });
+
+    // تعيين الحجم المفضل للزر
+    clearButton.setPreferredSize(new Dimension(200, 50));
+
+    // إضافة زر Clear إلى الـ panel
+    gbc.gridy++;
+    buttonPanel.add(clearButton, gbc);
+
+    // إعادة الرسم
+    buttonPanel.revalidate();
+    buttonPanel.repaint();
+}
+
+
+private void showHighScores() {
+    buttonPanel.removeAll();  // إزالة كل الأزرار السابقة
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+    gbc.insets = new Insets(10, 10, 10, 10);
+
+    // إنشاء JPanel لعرض الـ High Scores
+    JPanel highScoresPanel = new JPanel();
+    highScoresPanel.setLayout(new BoxLayout(highScoresPanel, BoxLayout.Y_AXIS));
+
+    // التحقق إذا كانت قائمة الـ highScores فارغة
+    if (highScores.isEmpty()) {
+        JLabel noScoresLabel = new JLabel("No high scores yet.");
+        noScoresLabel.setFont(new Font("Georgia", Font.PLAIN, 18));  // تغيير نوع الخط
+        noScoresLabel.setForeground(Color.WHITE);  // تعيين اللون الأبيض
+        highScoresPanel.add(noScoresLabel);
+    } else {
+        // ترتيب اللاعبين بناءً على النتيجة من الأعلى إلى الأقل
+        highScores.sort((p1, p2) -> Integer.compare(p2.getScore(), p1.getScore()));
+
+        // إضافة كل لاعب في القائمة إلى الـ JPanel
+        for (Player player : highScores) {
+            JLabel nameLabel = new JLabel(player.getName() + ": " + player.getScore());
+            nameLabel.setFont(new Font("Arial", Font.BOLD, 18));  // تغيير نوع الخط إلى Arial بالخط العريض
+            nameLabel.setForeground(Color.GREEN);  // تعيين اللون الأصفر
+            highScoresPanel.add(nameLabel);
+        }
+    }
+
+    // تعيين الصورة كخلفية للمحتوى
+    JScrollPane scrollPane = new JScrollPane(highScoresPanel);
+    scrollPane.setPreferredSize(new Dimension(400, 300));  // تحديد حجم التمرير
+
+    // إضافة الـ JLabel كـ Viewport داخل الـ JScrollPane
+    scrollPane.setViewportView(highScoresPanel);  // تأكد من أن الـ highScoresPanel هو الـ viewport وليس الـ JLabel
+    highScoresPanel.setOpaque(false);  // لجعل الـ JPanel شفافاً لكي تظهر الصورة خلفه
+
+    // إضافة الـ JScrollPane إلى الـ buttonPanel
+    gbc.gridy = 0;
+    buttonPanel.add(scrollPane, gbc);
+
+    // زر الرجوع إلى القائمة الرئيسية
+    JButton backButton = createImageButton(
+            IMAGE_PATH + "Return 1.png",
+            IMAGE_PATH + "Return 2.png",
+            this::showMainMenu);
+    backButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 2;  // وضع الزر في أسفل الصفحة
+    buttonPanel.add(backButton, gbc);
+
+    // إعادة الرسم بعد التغيير
+    buttonPanel.revalidate();
+    buttonPanel.repaint();
+
+    JButton clearButton = createImageButton(
+            IMAGE_PATH + "CLEAR.png",
+            "src\\Assets\\Images\\CLEAR1.png",
+            () -> {
+                clearHighScores();
+                showHighScores();  // تحديث العرض بعد الحذف
+            });
+    backButton.addActionListener(e -> {
+        playClickSound(IMAGE_PATH + "button-click_[cut_3sec].wav");
+    });
+    gbc.gridy = 1;  // وضع الزر أسفل الزر "Back"
+    buttonPanel.add(clearButton, gbc);
+
+}
 
     public static void main(String[] args) {
         MainMenu mainMenu = new MainMenu();
