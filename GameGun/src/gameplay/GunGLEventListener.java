@@ -255,12 +255,12 @@ public class GunGLEventListener extends GunListener {
             if (N==5) {
                 GameisRunning = false;
                 lose=true;
-
+                mainMenu.addPlayerScore(playerName, score);
             }
             if (score ==30){
                 GameisRunning = false;
                 lose=false;
-
+                mainMenu.addPlayerScore(playerName, score);
             }
         }
         if (!GameisRunning&&lose ) {
@@ -282,9 +282,6 @@ public class GunGLEventListener extends GunListener {
         }
 
     }
-
-
-
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
     }
@@ -369,14 +366,7 @@ public class GunGLEventListener extends GunListener {
     }
 
 
-
-
-
-
-
-
     boolean canShoot = true;
-
     public void handleKeyPress() {
         // controls of bullets
         if (isKeyPressed(KeyEvent.VK_SPACE) && canShoot) {
