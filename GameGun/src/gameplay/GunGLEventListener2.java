@@ -11,7 +11,10 @@ import javax.sound.sampled.*;
 import gameplay.GunGLEventListener.Directions;
 
 public class GunGLEventListener2 extends GunListener {
-
+    private MainMenu mainMenu;  // ربط MainMenu
+    private String difficulty;  // متغير لتخزين مستوى الصعوبة
+    private String playerName;  // متغير لتخزين اسم اللاعب
+    private int score;
 
     enum Directions2 {
         up,
@@ -33,7 +36,6 @@ public class GunGLEventListener2 extends GunListener {
     int soldierX = 0, soldierY = maxHeight / 3;
     int soldierX2 = 0, soldierY2 = maxHeight / 2;
     public int zombiesOfStage1 = 1;
-    int score = 0;
     int easy = 3;
     int k1 = (int) (Math.random() * 100) + 20;//to randomize the place of each zombies1
     int k2 = (int) (Math.random() * 100) + 20;//to randomize the place of each zombies2
@@ -99,15 +101,15 @@ public class GunGLEventListener2 extends GunListener {
         }
 
         for (int i = 0; i < easy; i++) {
-            zombies1.add(new Zombie(maxWidth + k1, (int) (Math.random() * (maxHeight - 30)), 5));
+            zombies1.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + k1, (int) (Math.random() * (maxHeight - 30)), 5));
             k1 = (int) (Math.random() * 100) + 20;
         }
         for (int i = 0; i < easy; i++) {
-            zombies2.add(new Zombie(maxWidth + k2, (int) (Math.random() * (maxHeight - 30)), 17));
+            zombies2.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + k2, (int) (Math.random() * (maxHeight - 30)), 17));
             k2 = (int) (Math.random() * 100) + 20;
         }
         for (int i = 0; i < easy; i++) {
-            zombies3.add(new Zombie(maxWidth + k3, (int) (Math.random() * (maxHeight - 30)), 29));
+            zombies3.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + k3, (int) (Math.random() * (maxHeight - 30)), 29));
             k3 = (int) (Math.random() * 100) + 20;
         }
 
@@ -120,20 +122,19 @@ public class GunGLEventListener2 extends GunListener {
         DrawBackground(gl);
         displayScore(gl);
         DrawSprite(gl, 49, 90, 40 - N, 0.25f, Directions.up);
-        DrawSprite(gl, 54, 90, 40 - M, 0.25f, Directions.up);
+
+
         handleKeyPress();
         handleKeyPress2();
         gl.glColor3f(1.0f, 1.0f, 1.0f);
+
         soldierIndex = soldierIndex % 4;
         soldierIndex2 = soldierIndex2 % 4;
-        if (N<5) {
-            DrawSprite(gl, soldierX, soldierY, soldierIndex, 1, direction);
-        }
-        if (M<5) {
-            DrawSprite3(gl, soldierX2, soldierY2, soldierIndex2, 1, direction2);
-        }
+
         if (GameisRunning) {
             displayTimer(gl);
+            DrawSprite(gl, soldierX, soldierY, soldierIndex, 1, direction);
+            DrawSprite3(gl, soldierX2, soldierY2, soldierIndex2, 1, direction2);
             for (Bullet bullet : bullets) {
                 if (bullet.isFired) {
                     switch (bullet.directions) {
@@ -166,7 +167,7 @@ public class GunGLEventListener2 extends GunListener {
                             bullet.x += 1.5;
                             break;
                     }
-                    DrawSprite(gl, bullet.x, bullet.y, 4, 0.3f, bullet.directions);
+
                 }
             }
         }
@@ -287,6 +288,13 @@ public class GunGLEventListener2 extends GunListener {
             if (score == 40) {
                 GameisRunning = false;
                 lose = false;
+            }
+            if (N<5) {
+
+                DrawSprite(gl, soldierX, soldierY, soldierIndex, 1, direction);
+            }
+            if (M<5) {
+                DrawSprite3(gl, soldierX2, soldierY2, soldierIndex2, 1, direction2);
             }
         }
 
@@ -779,22 +787,21 @@ public class GunGLEventListener2 extends GunListener {
         for (Zombie zombie : zombies1) {
             if (checkCollisionWithSoldier(zombie) || checkZombieOutOfBounds(zombie)) {
                 zombiesToRemove.add(zombie);
-                if (N <5) N++;
-
+                N++;
             }
         }
 
         for (Zombie zombie : zombies2) {
             if (checkCollisionWithSoldier(zombie) || checkZombieOutOfBounds(zombie)) {
                 zombiesToRemove.add(zombie);
-                if (N <5) N++;
+                N++;
             }
         }
 
         for (Zombie zombie : zombies3) {
             if (checkCollisionWithSoldier(zombie) || checkZombieOutOfBounds(zombie)) {
                 zombiesToRemove.add(zombie);
-                if (N <5) N++;
+                N++;
             }
         }
         zombies1.removeAll(zombiesToRemove);
@@ -848,24 +855,25 @@ public class GunGLEventListener2 extends GunListener {
             }
         }
         for (Zombie zombie : zombies1) {
-            if (checkCollisionWithSoldier2(zombie) || checkZombieOutOfBounds2(zombie)) {
+            if (checkCollisionWithSoldier2(zombie) || checkZombieOutOfBounds(zombie)) {
                 zombiesToRemove.add(zombie);
-                if (M<5) M++;
+                M++;
             }
 
         }
+
         for (Zombie zombie : zombies2) {
-            if (checkCollisionWithSoldier2(zombie) || checkZombieOutOfBounds2(zombie)) {
+            if (checkCollisionWithSoldier2(zombie) || checkZombieOutOfBounds(zombie)) {
                 zombiesToRemove.add(zombie);
-                if (M<5) M++;
+                M++;
             }
 
         }
 
         for (Zombie zombie : zombies3) {
-            if (checkCollisionWithSoldier2(zombie) || checkZombieOutOfBounds2(zombie)) {
+            if (checkCollisionWithSoldier2(zombie) || checkZombieOutOfBounds(zombie)) {
                 zombiesToRemove.add(zombie);
-                if (M<5) M++;
+                M++;
             }
 
         }
@@ -886,13 +894,13 @@ public class GunGLEventListener2 extends GunListener {
 
     private void regenerateZombies() {
         if (zombies1.isEmpty()) {
-            zombies1.add(new Zombie(maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 5));
+            zombies1.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 5));
         }
         if (zombies2.isEmpty()) {
-            zombies2.add(new Zombie(maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 17));
+            zombies2.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 17));
         }
         if (zombies3.isEmpty()) {
-            zombies3.add(new Zombie(maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 29));
+            zombies3.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 29));
         }
     }
 
@@ -941,9 +949,6 @@ public class GunGLEventListener2 extends GunListener {
     }
 
     private boolean checkZombieOutOfBounds(Zombie zombie) {
-        return zombie.x <= 1; // Assuming the left edge of the screen is x = 1
-    }
-    private boolean checkZombieOutOfBounds2(Zombie zombie) {
         return zombie.x <= 1; // Assuming the left edge of the screen is x = 1
     }
 
