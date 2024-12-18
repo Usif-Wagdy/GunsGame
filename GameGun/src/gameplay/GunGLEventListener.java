@@ -283,4 +283,157 @@ public class GunGLEventListener extends GunListener {
             clip.start();  // استئناف الصوت
         }
     }
+    private void resumeGameSound() {
+        if (clip != null && !clip.isRunning()) {
+            clip.start();  // استئناف الصوت
+        }
+    }
+
+    //yousef ashraf (handleCollisions)
+    private void handleCollisions(GL gl) {
+        // List to store zombies and bullets to be removed
+        ArrayList<Zombie> zombiesToRemove = new ArrayList<>();
+        ArrayList<Bullet> bulletsToRemove = new ArrayList<>();
+
+        // Check for bullet-zombie collisions
+        for (Bullet bullet : bullets) {
+            if (bullet.isFired) {
+                // Check collision with zombies1
+                for (Zombie zombie : zombies1) {
+                    if (checkCollision(bullet, zombie)) {
+                        zombiesToRemove.add(zombie);
+                        bulletsToRemove.add(bullet);
+                        bloodEffects.add(new BloodEffect(zombie.x, zombie.y, 60)); // Add blood effect
+                        counter++; // Increase score
+                        score++;
+                        playSound("src\\Assets\\sounds\\zombiehit.wav");
+
+                    }
+                }
+
+                // Repeat collision check for zombies2 and zombies3
+                for (Zombie zombie : zombies2) {
+                    if (checkCollision(bullet, zombie)) {
+                        zombiesToRemove.add(zombie);
+                        bulletsToRemove.add(bullet);
+                        bloodEffects.add(new BloodEffect(zombie.x, zombie.y, 60));
+                        counter++;
+                        score++;
+                        playSound("src\\Assets\\sounds\\zombiehit.wav");
+                    }
+                }
+                for (Zombie zombie : zombies3) {
+                    if (checkCollision(bullet, zombie)) {
+                        zombiesToRemove.add(zombie);
+                        bulletsToRemove.add(bullet);
+                        bloodEffects.add(new BloodEffect(zombie.x, zombie.y, 60));
+                        counter++;
+                        score++;
+                        playSound("src\\Assets\\sounds\\zombiehit.wav");
+                    }
+
+                }
+
+            }
+        }
+        for (Zombie zombie : zombies1) {
+            if (checkCollisionWithSoldier(zombie) || checkZombieOutOfBounds(zombie)) {
+                zombiesToRemove.add(zombie);
+                N++;
+            }
+        }
+
+        for (Zombie zombie : zombies2) {
+            if (checkCollisionWithSoldier(zombie) || checkZombieOutOfBounds(zombie)) {
+                zombiesToRemove.add(zombie);
+                N++;
+            }
+        }
+
+        for (Zombie zombie : zombies3) {
+            if (checkCollisionWithSoldier(zombie) || checkZombieOutOfBounds(zombie)) {
+                zombiesToRemove.add(zombie);
+                N++;
+            }
+        }
+        zombies1.removeAll(zombiesToRemove);
+        zombies2.removeAll(zombiesToRemove);
+        zombies3.removeAll(zombiesToRemove);
+        bullets.removeAll(bulletsToRemove);
+        regenerateZombies();
+    }
+
+    private boolean checkCollision(Bullet bullet, Zombie zombie) {
+        return Math.abs(bullet.x - zombie.x) < 5 && Math.abs(bullet.y - zombie.y) < 5;
+    }
+
+    private void regenerateZombies() {
+        if (zombies1.isEmpty()) {
+            zombies1.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 5));
+        }
+        if (zombies2.isEmpty()) {
+            zombies2.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 17));
+        }
+        if (zombies3.isEmpty()) {
+            zombies3.add(new Zombie(mainMenu, playerName, difficulty,maxWidth + (int) (Math.random() * 100), (int) (Math.random() * (maxHeight - 30)), 29));
+        }
+    }
+
+    //    boolean flag=false;// fix the motion of soldier
+    public BitSet keyBits = new BitSet(256);
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        if (keyCode == KeyEvent.VK_ESCAPE) {
+            togglePause();  // التعامل مع إيقاف اللعبة عند الضغط على ESC
+        }
+        keyBits.set(keyCode);
+    }
+
+    @Override
+    public void keyReleased(final KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        keyBits.clear(keyCode);
+    }
+
+    @Override
+    public void keyTyped(final KeyEvent event) {
+        // don't care
+    }
+
+    public boolean isKeyPressed(final int keyCode) {
+        return keyBits.get(keyCode);
+    }
+
+    public void playSound(String soundFileName) {
+        try {
+            File soundFile = new File(soundFileName);  // حدد المسار الكامل للملف الصوتي
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
+            clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();  // تشغيل الصوت
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean checkCollisionWithSoldier(Zombie zombie) {
+        return Math.abs(zombie.x - soldierX) < 5 && Math.abs(zombie.y - soldierY) < 5;
+    }
+
+    private boolean checkZombieOutOfBounds(Zombie zombie) {
+        return zombie.x <= 1; // Assuming the left edge of the screen is x = 1
+    }
+
+    public void displayScore(GL gl) {
+        String scoreString = String.valueOf(score);
+        double x = 13;
+        double y = 90;
+        for (int i = 0; i < scoreString.length(); i++) {
+            char digit = scoreString.charAt(i);
+            int digitIndex = digit - '0' + 35;
+            DrawSprite(gl, x, y, digitIndex, 0.4f, gameplay.GunGLEventListener.Directions.up);
+            x += 5;
+        }
+    }
 }
