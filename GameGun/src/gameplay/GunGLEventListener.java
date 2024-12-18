@@ -255,12 +255,12 @@ public class GunGLEventListener extends GunListener {
             if (N==5) {
                 GameisRunning = false;
                 lose=true;
-                mainMenu.addPlayerScore(playerName, score);
+
             }
             if (score ==30){
                 GameisRunning = false;
                 lose=false;
-                mainMenu.addPlayerScore(playerName, score);
+
             }
         }
         if (!GameisRunning&&lose ) {
@@ -514,11 +514,7 @@ public class GunGLEventListener extends GunListener {
             clip.start();  // استئناف الصوت
         }
     }
-    private void resumeGameSound() {
-        if (clip != null && !clip.isRunning()) {
-            clip.start();  // استئناف الصوت
-        }
-    }
+    
 
     //yousef ashraf (handleCollisions)
     private void handleCollisions(GL gl) {
