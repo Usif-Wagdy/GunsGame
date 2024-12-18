@@ -146,7 +146,7 @@ public class GunGLEventListener extends GunListener {
         gl.glLoadIdentity();
         DrawBackground(gl);
         displayScore(gl);
-        DrawSprite(gl, 53, 90, 40 - N, 0.35f, gameplay.GunGLEventListener.Directions.up);
+        DrawSprite(gl, 53, 90, 40 - N, 0.35f, Directions.up);
         handleKeyPress();
         gl.glColor3f(1.0f, 1.0f, 1.0f);
 
@@ -192,7 +192,7 @@ public class GunGLEventListener extends GunListener {
             }
             for (Zombie zombie : zombies1) {
                 zombie.move1(speed);
-                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1.2f, gameplay.GunGLEventListener.Directions.up);
+                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1.2f, Directions.up);
                 // stage 1
                 if (checkCollisionWithSoldier(zombie)) {
                     playSound("src\\Assets\\sounds\\zombieBite.wav");
@@ -213,7 +213,7 @@ public class GunGLEventListener extends GunListener {
             }
             for (Zombie zombie : zombies2) {
                 zombie.move2(speed);
-                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1f, gameplay.GunGLEventListener.Directions.up);
+                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1f, Directions.up);
                 // stage 1
                 if (checkCollisionWithSoldier(zombie)) {
                     playSound( "src\\Assets\\sounds\\zombieBite.wav");
@@ -228,7 +228,7 @@ public class GunGLEventListener extends GunListener {
             }
             for (Zombie zombie : zombies3) {
                 zombie.move3(speed);
-                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1.2f, gameplay.GunGLEventListener.Directions.up);
+                DrawSprite(gl, zombie.x, zombie.y, zombie.index, 1.2f, Directions.up);
                 if (checkCollisionWithSoldier(zombie)) {
                     playSound("src\\Assets\\sounds\\zombieBite.wav");
                 }
@@ -245,7 +245,7 @@ public class GunGLEventListener extends GunListener {
             for (int i = 0; i < bloodEffects.size(); i++) {
                 BloodEffect blood = bloodEffects.get(i);
                 // رسم الدم
-                DrawSprite(gl, blood.x, blood.y, texture.length - 2, 1, gameplay.GunGLEventListener.Directions.up); // Blood texture
+                DrawSprite(gl, blood.x, blood.y, texture.length - 2, 1, Directions.up); // Blood texture
                 blood.timer--;
                 if (blood.timer <= 0) {
                     bloodEffects.remove(i);
@@ -264,12 +264,12 @@ public class GunGLEventListener extends GunListener {
             }
         }
         if (!GameisRunning&&lose ) {
-            DrawSprite(gl, 45, 50, texture.length - 3, 5f, gameplay.GunGLEventListener.Directions.up);
+            DrawSprite(gl, 45, 50, texture.length - 3, 5f, Directions.up);
             stopGameSound();
         }
 
         if(!GameisRunning && !lose){
-            DrawSprite(gl, 45, 50, texture.length - 4, 5f, gameplay.GunGLEventListener.Directions.up);
+            DrawSprite(gl, 45, 50, texture.length - 4, 5f, Directions.up);
             stopGameSound();
         }
         long currentTime = System.nanoTime();
@@ -282,6 +282,10 @@ public class GunGLEventListener extends GunListener {
         }
 
     }
+
+
+
+
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
     }
@@ -365,8 +369,11 @@ public class GunGLEventListener extends GunListener {
         gl.glDisable(GL.GL_BLEND);
     }
 
-
+    /*
+     * KeyListener
+     */
     boolean canShoot = true;
+
     public void handleKeyPress() {
         // controls of bullets
         if (isKeyPressed(KeyEvent.VK_SPACE) && canShoot) {
@@ -504,7 +511,6 @@ public class GunGLEventListener extends GunListener {
             clip.start();  // استئناف الصوت
         }
     }
-    
 
     //yousef ashraf (handleCollisions)
     private void handleCollisions(GL gl) {
@@ -649,7 +655,7 @@ public class GunGLEventListener extends GunListener {
         for (int i = 0; i < scoreString.length(); i++) {
             char digit = scoreString.charAt(i);
             int digitIndex = digit - '0' + 35;
-            DrawSprite(gl, x, y, digitIndex, 0.4f, gameplay.GunGLEventListener.Directions.up);
+            DrawSprite(gl, x, y, digitIndex, 0.4f, Directions.up);
             x += 5;
         }
     }
@@ -664,4 +670,7 @@ public class GunGLEventListener extends GunListener {
             x += 5; //Distance between numbers
         }
     }
+
+
+
 }
